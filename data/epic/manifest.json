@@ -2,7 +2,7 @@
  "day": "2026-11-13",
  "source": "https://epic.gsfc.nasa.gov/api/natural",
  "license": "NASA EPIC imagery, public domain (NASA/NOAA DSCOVR)",
- "baked_at": "2026-11-15T23:53:40+00:00",
+ "baked_at": "2026-11-15T23:54:26+00:00",
  "frames": [
   {
    "file": "epic_1b_20261113002712.webp",
