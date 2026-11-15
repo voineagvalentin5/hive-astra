@@ -31,6 +31,14 @@ def main():
     day = meta[-1]["date"][:10]
     meta = [m for m in meta if m["date"][:10] == day]
     OUT.mkdir(parents=True, exist_ok=True)
+    try:
+        old = json.loads((OUT / "manifest.json").read_text())
+        if old.get("day") == day and [f["meta"]["image"] for f in old.get("frames", [])] == [m["image"] for m in meta] \
+                and all((OUT / f["file"]).exists() for f in old["frames"]):
+            print("EPIC cache already current for", day, "- nothing to do")
+            return 0
+    except (OSError, ValueError, KeyError):
+        pass
     frames = []
     for m in meta:
         if not re.fullmatch(r"epic_1b_\d{14}", m["image"]):
