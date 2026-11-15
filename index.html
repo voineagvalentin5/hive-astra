@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<meta name="theme-color" content="#090c12"/>
+<meta name="description" content="Hive Astra — an interactive solar system and live space science workbench by Codex Hive Labs."/>
+<title>Hive Astra · by Codex Hive Labs</title>
+<link rel="icon" type="image/png" href="assets/icon.png"/>
+<link rel="stylesheet" href="styles.css"/>
+</head>
+<body>
+<div class="hex-sky" aria-hidden="true"></div>
+<div id="app">
+  <header class="site-header">
+    <div class="brand-stack" role="banner">
+      <div class="brand-mark"><img src="assets/icon.png" alt=""/></div>
+      <div class="brand-title"><div class="brand-line"><span class="brand-hive">HIVE</span> <span class="brand-astra">ASTRA</span><span class="brand-spark">✦</span></div><div class="brand-caption">A CODEX HIVE RESEARCH EXPERIENCE</div></div>
+    </div>
+    <div class="head-center"><span class="badge-soft"><span class="status-dot" id="connectionDot"></span><span id="connectionLabel">CONNECTING TO TELEMETRY</span></span><span class="head-divider"></span><span id="utcClock">— UTC</span></div>
+    <div class="head-right"><button class="small-icon" id="themeButton" title="Toggle high-contrast mode" aria-label="Toggle high contrast">◐</button><button class="header-outline" id="sourcesButton">SOURCES <span aria-hidden="true">↗</span></button></div>
+  </header>
+  <nav class="top-tabs" aria-label="Primary navigation">
+    <button class="tab active" data-tab="explore"><span class="tab-icon">✦</span> Explore</button>
+    <button class="tab" data-tab="signals"><span class="tab-icon">⌁</span> Live signals <span class="mini-live-dot"></span></button>
+    <button class="tab" data-tab="missions"><span class="tab-icon">◈</span> Missions</button>
+    <button class="tab" data-tab="learn"><span class="tab-icon">◇</span> Hive Academy</button>
+    <button class="tab" data-tab="about"><span class="tab-icon">◎</span> About</button>
+    <span class="tab-spacer"></span><span class="navigation-hint">INTERACTIVE SOLAR SYSTEM · SCIENTIFIC DATA WORKBENCH</span>
+  </nav>
+
+  <main class="main-layout" id="explorePanel">
+    <aside class="left-panel glass-panel">
+      <div class="eyebrow">CELESTIAL NAVIGATOR <span class="gold-plus">✳</span></div>
+      <label class="search-wrap" for="bodySearch"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6.5"/><path d="m16 16 5 5"/></svg><input id="bodySearch" type="search" placeholder="Find a celestial body…" autocomplete="off"/><kbd>/</kbd></label>
+      <div class="panel-label-row"><span>OBJECT DIRECTORY</span><span class="tiny-pill">10 OBJECTS</span></div>
+      <div id="bodyList" class="body-list" role="listbox" aria-label="Solar system objects"></div>
+      <div class="left-footer">
+        <div class="eyebrow">OBSERVING FROM</div>
+        <button class="location-button" id="locationButton"><span class="location-glyph">⌖</span><span><strong id="locationName">Gobles, Michigan</strong><small>United States · Change location</small></span><span class="edit-glyph">✎</span></button>
+        <div class="left-status"><span>●</span> Orbital visualization is illustrative</div>
+      </div>
+    </aside>
+
+    <section class="scene-column">
+      <div class="scene-panel glass-panel" id="scenePanel">
+        <canvas id="orrery" aria-label="Interactive projected 3D solar system. Drag to rotate; scroll to zoom. Select a body using the left list or click a planet."></canvas>
+        <div class="scene-vignette" aria-hidden="true"></div>
+        <div class="scene-topline"><div><div class="eyebrow gold">THE HIVE OBSERVATORY</div><h1>Explore the <em>extraordinary.</em></h1><div class="subheading">The solar system, a new perspective.</div></div><span class="scene-badge"><i></i> INTERACTIVE MODEL</span></div>
+        <div class="scene-mousehint"><span>✥</span> DRAG TO ORBIT <span class="sep">/</span> SCROLL TO ZOOM <span class="sep">/</span> CLICK TO EXPLORE</div>
+        <div id="sceneLabels" aria-hidden="true"></div>
+        <div class="scene-controls"><button id="zoomIn" aria-label="Zoom in" title="Zoom in">+</button><button id="zoomOut" aria-label="Zoom out" title="Zoom out">−</button><span></span><button id="resetView" aria-label="Reset camera" title="Reset camera">⌖</button><button id="pauseMotion" aria-label="Pause animation" title="Pause animation">Ⅱ</button></div>
+        <div class="scene-legend"><span><i class="legend-gold"></i> INNER SOLAR SYSTEM</span><span><i class="legend-blue"></i> OUTER SOLAR SYSTEM</span></div>
+        <div class="scene-modelnote">POSITIONS: APPROXIMATE · DISTANCES &amp; SIZES NOT TO SCALE</div>
+      </div>
+      <div class="time-bar glass-panel"><div class="time-logo">◴</div><div class="time-copy"><div class="time-header">TIME EXPLORER <span class="timemeta">approximate orbital motion</span></div><div id="displayDate" class="time-date">November 15, 2026</div></div><input type="range" min="-365" max="365" step="1" value="0" id="timeRange" aria-label="Move orbital date backward or forward one year"/><button id="todayButton" class="today-button">TODAY ↺</button></div>
+      <div class="bottom-kpis">
+        <div class="metric-card glass-panel" id="kpiSolar"><div class="metric-icon amber-icon">☼</div><div><span class="metric-label">SOLAR ACTIVITY</span><strong id="kpiFlares">—</strong><small id="solarDetail">Awaiting NASA DONKI</small></div></div>
+        <div class="metric-card glass-panel" id="kpiKp"><div class="metric-icon violet-icon">≋</div><div><span class="metric-label">GEOMAGNETIC Kp</span><strong id="kpiKpValue">—</strong><small id="kpDetail">Awaiting NOAA SWPC</small></div></div>
+        <div class="metric-card glass-panel" id="kpiQuakes"><div class="metric-icon blue-icon">⌁</div><div><span class="metric-label">EARTHQUAKES M2.5+</span><strong id="kpiQuakesValue">—</strong><small id="quakeDetail">Awaiting USGS</small></div></div>
+      </div>
+    </section>
+
+    <aside class="right-panel glass-panel" id="inspectorPanel">
+      <div class="inspector-heading"><div class="eyebrow">OBJECT INSPECTOR <span class="panel-number">/ 01</span></div><button id="refreshButton" class="small-refresh" title="Refresh observations" aria-label="Refresh observations">↻</button></div>
+      <div class="feature-planet" id="featurePlanet"><div class="planet-aura"></div><div id="featureGlobe" class="feature-globe sun"></div></div>
+      <div class="object-title-row"><div><div class="eyebrow gold" id="objectKind">G2V · YELLOW DWARF</div><h2 id="objectName">The Sun</h2></div><div class="object-icon" id="objectGlyph">☼</div></div>
+      <p class="object-description" id="objectDescription">The star at the center of our solar system, driving the solar wind and space weather throughout the heliosphere.</p>
+      <div class="measure-grid"><div><span>MEAN DISTANCE</span><strong id="distanceValue">0 AU</strong></div><div><span>DIAMETER</span><strong id="diameterValue">1.39M km</strong></div></div>
+      <div class="signal-title"><span>LIVE OBSERVATIONS</span><span class="live-label"><i></i><span id="panelStatus">DATA PENDING</span></span></div>
+      <div id="observationCards" class="observation-cards"></div>
+      <div class="right-end"><a id="sourceLink" href="https://science.nasa.gov/sun/" target="_blank" rel="noopener noreferrer">EXPLORE AT NASA <span>↗</span></a><div class="updated-at" id="dataTimestamp">Values are source-labeled and time-stamped</div></div>
+    </aside>
+  </main>
+
+  <section class="content-panel hidden" id="signalsPanel"><div class="content-top"><div class="eyebrow gold">SITUATIONAL AWARENESS</div><h2>Live signals, clearly explained.</h2><p>Observed and forecast events, with sources and timestamps. Unavailable feeds are never replaced with fabricated numbers.</p></div><div id="signalGrid" class="content-cards"></div></section>
+  <section class="content-panel hidden" id="missionsPanel"><div class="content-top"><div class="eyebrow gold">FROM THE FRONTIER</div><h2>Mission control.</h2><p>Find real imagery and science from active missions. Mission links open the primary NASA and JPL archives.</p></div><div class="content-cards mission-cards" id="missionGrid"></div></section>
+  <section class="content-panel hidden" id="learnPanel"><div class="content-top"><div class="eyebrow gold">HIVE ACADEMY</div><h2>Look closer. Understand more.</h2><p>Learn the science behind orbits, space weather, and the astronomical observations you explore.</p></div><div class="content-cards" id="lessonGrid"></div></section>
+  <section class="content-panel hidden" id="aboutPanel"><div class="content-top"><div class="eyebrow gold">ABOUT THE PROJECT</div><h2>Hive Astra.</h2><p>An exploratory astronomy workbench by Codex Hive Labs—where interactive visualization meets real scientific observations.</p></div><div class="about-split"><img class="about-logo" src="assets/hive-astra-emblem.webp" alt="Hive Astra official emblem"/><div><h3>Built to inspire exploration.</h3><p>The interactive orrery uses simplified orbital elements and deliberately exaggerated visual sizes. This is a learning and discovery experience, not a navigation-grade ephemeris.</p><p>Live observations are labeled by source and distinguished from orbital estimates, predictions, and illustrations. No agency endorsement is implied.</p><button class="gold-button" id="aboutSources">View source references ↗</button></div></div></section>
+
+  <footer class="site-footer"><span>© <span id="year"></span> CODEX HIVE LABS LLC</span><span class="footer-center">HIVE ASTRA <span class="gold">✦</span> INTELLIGENCE IN COMPLEX SYSTEMS</span><button id="footerSources">DATA SOURCES &amp; ATTRIBUTION ↗</button></footer>
+</div>
+<div class="modal-backdrop hidden" id="modalBackdrop"><div class="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle"><button class="modal-close" id="modalClose" aria-label="Close">×</button><div class="eyebrow gold">HIVE ASTRA</div><h2 id="modalTitle">Data sources</h2><div id="modalBody"></div></div></div>
+<script src="app.js" defer></script>
+</body>
+</html>
