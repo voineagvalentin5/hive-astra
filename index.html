@@ -63,10 +63,16 @@
 
     <aside class="right-panel glass-panel" id="inspectorPanel">
       <div class="inspector-heading"><div class="eyebrow">OBJECT INSPECTOR <span class="panel-number">/ 01</span></div><button id="refreshButton" class="small-refresh" title="Refresh observations" aria-label="Refresh observations">↻</button></div>
-      <div class="feature-planet" id="featurePlanet"><div class="planet-aura"></div><div id="featureGlobe" class="feature-globe sun"></div></div>
+      <div class="feature-planet" id="featurePlanet"><div class="planet-aura"></div><div id="featureGlobe" class="feature-globe sun"></div><canvas id="featureCanvas" aria-hidden="true"></canvas></div>
       <div class="object-title-row"><div><div class="eyebrow gold" id="objectKind">G2V · YELLOW DWARF</div><h2 id="objectName">The Sun</h2></div><div class="object-icon" id="objectGlyph">☼</div></div>
       <p class="object-description" id="objectDescription">The star at the center of our solar system, driving the solar wind and space weather throughout the heliosphere.</p>
       <div class="measure-grid"><div><span>MEAN DISTANCE</span><strong id="distanceValue">0 AU</strong></div><div><span>DIAMETER</span><strong id="diameterValue">1.39M km</strong></div></div>
+      <section class="epic-block hidden" id="epicBlock" aria-label="NASA EPIC real image sequence">
+        <div class="epic-head"><span class="eyebrow gold">NASA EPIC · REAL IMAGES</span><div class="epic-buttons"><button data-epic-mode="globe" class="active" title="EPIC photos re-projected onto the globe">GLOBE</button><button data-epic-mode="disk" title="Original EPIC disk photos">ORIGINAL</button><button id="epicPlay" aria-label="Pause EPIC sequence" title="Play / pause">Ⅱ</button></div></div>
+        <div class="epic-stage"><canvas id="epicGlobe"></canvas><canvas id="epicDisk" class="hidden"></canvas><span id="epicStatus" class="epic-status">LOADING EPIC…</span></div>
+        <input type="range" id="epicScrub" min="0" max="11" step="1" value="0" aria-label="Step through EPIC frames"/>
+        <div class="epic-caption" id="epicCaption"><small>Loading the latest NASA EPIC image sequence…</small></div>
+      </section>
       <div class="signal-title"><span>LIVE OBSERVATIONS</span><span class="live-label"><i></i><span id="panelStatus">DATA PENDING</span></span></div>
       <div id="observationCards" class="observation-cards"></div>
       <div class="right-end"><a id="sourceLink" href="https://science.nasa.gov/sun/" target="_blank" rel="noopener noreferrer">EXPLORE AT NASA <span>↗</span></a><div class="updated-at" id="dataTimestamp">Values are source-labeled and time-stamped</div></div>
@@ -81,6 +87,8 @@
   <footer class="site-footer"><span>© <span id="year"></span> CODEX HIVE LABS LLC</span><span class="footer-center">HIVE ASTRA <span class="gold">✦</span> INTELLIGENCE IN COMPLEX SYSTEMS</span><button id="footerSources">DATA SOURCES &amp; ATTRIBUTION ↗</button></footer>
 </div>
 <div class="modal-backdrop hidden" id="modalBackdrop"><div class="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle"><button class="modal-close" id="modalClose" aria-label="Close">×</button><div class="eyebrow gold">HIVE ASTRA</div><h2 id="modalTitle">Data sources</h2><div id="modalBody"></div></div></div>
+<script src="globe.js" defer></script>
+<script src="epic.js" defer></script>
 <script src="app.js" defer></script>
 </body>
 </html>

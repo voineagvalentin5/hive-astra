@@ -51,4 +51,20 @@ Then open `http://localhost:8080` in a modern browser. Opening `index.html` as a
 - `styles.css` — responsive branded design
 - `app.js` — interactive 3D-projected orbital canvas, cards, and telemetry
 - `assets/hive-astra-emblem.webp` / `assets/icon.png` — brand emblem and 512px app icon
+- `globe.js` / `epic.js` — textured sphere renderer and NASA EPIC sequence
+- `assets/textures/` — planet texture maps
+- `data/epic/` + `tools/bake_epic.py` + `.github/workflows/epic-cache.yml` — same-origin EPIC cache and its 6-hour refresh
 - `CNAME` / `.nojekyll` — GitHub Pages custom domain
+
+## Textured planets and NASA EPIC sequence
+
+- **Textured planets.** `globe.js` draws every body as a rotating, sunlit sphere by sampling real equirectangular texture maps on a 2D canvas (no WebGL or CDN). Saturn has a textured ring. Textures are in `assets/textures/` (about 600 KB, WebP). If they cannot load (for example via `file://`), simple procedural discs are used instead.
+- **NASA EPIC sequence (Earth).** `epic.js` loads the latest published day of EPIC natural-color images (about 12 frames, roughly 1h48m apart) and plays them in the Earth inspector, either as the original disk photos or re-projected onto the 3D globe. It is labeled as real NASA EPIC images with the capture date and time in UTC, and is not live.
+- **How the projection works.** Each frame's metadata gives the centroid latitude/longitude (the point directly below DSCOVR). The disk is located in the photo, the view is treated as orthographic from that point, and every map pixel on the visible side is looked up in the photo and blended over the NASA Blue Marble base map, fading toward the limb. Areas EPIC did not see keep the base map.
+- **Image access.** epic.gsfc.nasa.gov serves images without CORS headers, so the page cannot read their pixels directly. `tools/bake_epic.py` keeps a resized same-origin copy of the latest day in `data/epic/`, refreshed every 6 hours by `.github/workflows/epic-cache.yml`. If that copy is older than the newest EPIC day, the page falls back to api.nasa.gov (`DEMO_KEY`, up to 6 frames), then to the original photos without projection. If EPIC cannot be reached, the panel says so and shows the static base map.
+
+### Texture credits
+
+- Earth: NASA Visible Earth "Blue Marble" (NASA Goddard / Reto Stöckli), public domain.
+- Sun, Mercury, Venus (atmosphere), Moon, Mars, Jupiter, Saturn and ring, Uranus, Neptune: [Solar System Scope](https://www.solarsystemscope.com/textures/), licensed [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/), based on NASA data. Resized to WebP.
+- EPIC imagery: NASA EPIC team / NOAA DSCOVR, public domain.

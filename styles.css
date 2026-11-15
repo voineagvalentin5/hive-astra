@@ -16,3 +16,19 @@
 @media(prefers-reduced-motion:reduce){*,*:before,*:after{animation-duration:.001ms!important;transition-duration:.001ms!important;scroll-behavior:auto!important}}
 /* Mobile widths must be constrained independently of the horizontal object scroller. */
 @media(max-width:730px){html,body,#app{max-width:100%;overflow-x:clip}.main-layout,.left-panel,.scene-column,.right-panel{width:100%;min-width:0;max-width:100%}.left-panel{overflow:hidden}.body-list{width:100%;min-width:0;overscroll-behavior-x:contain}}
+
+/* v2: textured spheres + NASA EPIC sequence */
+#featureCanvas{position:absolute;inset:0;width:100%;height:100%;display:none}
+.feature-planet.textured #featureCanvas{display:block}.feature-planet.textured .feature-globe{display:none}
+.epic-block{border:1px solid var(--line);border-radius:9px;background:rgba(6,10,16,.55);padding:10px 10px 9px;margin:-8px 0 18px}
+.epic-head{display:flex;align-items:center;justify-content:space-between;gap:6px;margin-bottom:8px}.epic-head .eyebrow{font-size:8px;white-space:nowrap;letter-spacing:1.1px}
+.epic-buttons{display:flex;gap:4px}.epic-buttons button{font-size:7.5px;letter-spacing:.6px;padding:5px 6px;border:1px solid #2c343d;border-radius:5px;background:#0d131a;color:#9aa6b2;min-width:26px}
+.epic-buttons button.active{color:#ffdfaa;border-color:rgba(235,169,74,.45);background:rgba(218,151,58,.14)}
+.epic-stage{position:relative;height:220px;border-radius:7px;background:radial-gradient(circle,#0b1522,#05080c 70%);overflow:hidden}
+.epic-stage canvas{position:absolute;inset:0;width:100%;height:100%}
+.epic-status{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);z-index:2;background:rgba(5,8,12,.7);padding:5px 8px;border-radius:4px;font-size:8px;letter-spacing:1.3px;color:#7d8a97}
+.epic-status:empty{display:none}
+#epicScrub{width:100%;margin:8px 0 4px;accent-color:#e3a54f}
+.epic-caption{font-size:9.5px;line-height:1.5;color:#a8b3bf}.epic-caption strong{color:#f0d9ad;font-weight:650}.epic-caption small{display:block;color:#6f7d8b;font-size:8.5px;margin-top:3px}.epic-frame{color:#cfd7df}
+@media(max-width:1020px){.epic-block{grid-column:1/-1;grid-row:6;margin:12px 0}}
+@media(max-width:730px){.epic-stage{height:260px}.epic-block{margin:0 0 16px}}
