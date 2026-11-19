@@ -8,6 +8,7 @@
 <title>Hive Astra · by Codex Hive Labs</title>
 <link rel="icon" type="image/png" href="assets/icon.png"/>
 <link rel="stylesheet" href="styles.css"/>
+<link rel="stylesheet" href="observatory.css"/>
 </head>
 <body>
 <!-- chl-lab-nav -->
@@ -166,8 +167,170 @@
     </aside>
   </main>
 
-  <section class="content-panel hidden" id="signalsPanel"><div class="content-top"><div class="eyebrow gold">SITUATIONAL AWARENESS</div><h2>Live signals, clearly explained.</h2><p>Observed and forecast events, with sources and timestamps. Unavailable feeds are never replaced with fabricated numbers.</p></div><div id="signalGrid" class="content-cards"></div></section>
-  <section class="content-panel hidden" id="missionsPanel"><div class="content-top"><div class="eyebrow gold">FROM THE FRONTIER</div><h2>Mission control.</h2><p>Find real imagery and science from active missions. Mission links open the primary NASA and JPL archives.</p></div><div class="content-cards mission-cards" id="missionGrid"></div></section>
+  <section class="content-panel hidden obs" id="signalsPanel" aria-labelledby="sigTitle">
+    <div class="obs-head">
+      <div>
+        <div class="eyebrow gold">SPACE WEATHER · LIVE SIGNALS</div>
+        <h2 id="sigTitle">From the Sun to Earth, <em>right now.</em></h2>
+        <p>Every number on this page is pulled live from NOAA and NASA when the page loads. If a feed can't be reached, you'll see a dash, not a guess.</p>
+      </div>
+      <div class="obs-head-side">
+        <div class="scale-chips" id="scaleChips" aria-label="NOAA space weather scales, current">
+          <span class="scale-chip" data-scale="R"><b>R</b><span>—</span><small>Radio</small></span>
+          <span class="scale-chip" data-scale="S"><b>S</b><span>—</span><small>Radiation</small></span>
+          <span class="scale-chip" data-scale="G"><b>G</b><span>—</span><small>Geomagnetic</small></span>
+        </div>
+        <div class="obs-updated"><span class="pulse" id="sigPulse"></span><span id="sigUpdated">Connecting to NOAA SWPC…</span><button class="obs-refresh" id="sigRefresh" type="button" aria-label="Refresh live data">↻</button></div>
+      </div>
+    </div>
+
+    <div class="obs-hero hex-frame" id="sunEarthHero">
+      <div class="hero-sun">
+        <img id="heroSun" src="https://sdo.gsfc.nasa.gov/assets/img/latest/latest_1024_0171.jpg" alt="Latest NASA SDO AIA 171 Ångström image of the Sun"/>
+        <span class="hero-tag live">LIVE IMAGE · NASA SDO</span>
+      </div>
+      <svg class="hero-stream" viewBox="0 0 800 300" preserveAspectRatio="none" aria-hidden="true">
+        <defs>
+          <linearGradient id="streamG" x1="0" x2="1"><stop offset="0" stop-color="#ffcf6b" stop-opacity=".85"/><stop offset=".55" stop-color="#e0a526" stop-opacity=".35"/><stop offset="1" stop-color="#e0a526" stop-opacity="0"/></linearGradient>
+          <radialGradient id="cmeG" cx="0" cy=".5" r="1"><stop offset="0" stop-color="#ffd27a" stop-opacity=".55"/><stop offset="1" stop-color="#ffd27a" stop-opacity="0"/></radialGradient>
+        </defs>
+        <path d="M0,150 C200,40 520,60 800,128 L800,172 C520,240 200,260 0,150Z" fill="url(#streamG)" opacity=".55"/>
+        <path d="M30,150 C140,80 220,70 300,90 C260,130 260,170 300,210 C220,230 140,220 30,150Z" fill="url(#cmeG)" class="cme-puff"/>
+        <g class="stream-lines" stroke="#ffd27a" stroke-width="1.2" fill="none" opacity=".55">
+          <path d="M0,150 C240,90 520,100 800,140"/><path d="M0,150 C240,210 520,200 800,160"/><path d="M0,150 C260,125 520,130 800,150"/>
+        </g>
+        <g class="particles" fill="#ffe2a0"></g>
+      </svg>
+      <div class="hero-earth">
+        <div class="earth-wrap">
+          <img id="heroEarth" alt="Earth from NASA EPIC (DSCOVR)" />
+          <div class="aurora-ring" aria-hidden="true"></div>
+          <div class="magneto" aria-hidden="true"></div>
+        </div>
+        <span class="hero-tag" id="heroEarthTag">EARTH · NASA EPIC</span>
+      </div>
+      <div class="hero-callout c-wind"><small>SOLAR WIND AT L1</small><strong id="heroWind">—</strong><span id="heroWindSub">km/s · NOAA RTSW</span></div>
+      <div class="hero-callout c-imf"><small>MAGNETIC FIELD (IMF)</small><strong id="heroImf">—</strong><span id="heroImfSub">Bt / Bz · nT</span></div>
+      <div class="hero-callout c-kp"><small>GEOMAGNETIC Kp</small><strong id="heroKp">—</strong><span id="heroKpSub">NOAA estimated, 1-min</span></div>
+      <div class="hero-caption" id="heroCaption">Sun: latest NASA SDO/AIA 171 Å image (<a href="https://sdo.gsfc.nasa.gov/assets/img/latest/latest_1024_0171.jpg" target="_blank" rel="noopener noreferrer">full image with capture time ↗</a>). Earth: NASA EPIC photo<span id="earthDate"></span>. The particle stream, CME glow and aurora ring are <b>illustration, not to scale</b>; the numbers are live.</div>
+    </div>
+
+    <div class="stat-row" id="statRow">
+      <article class="stat-card" id="statWind"><header><span class="stat-ico">≋</span><span>Solar wind speed</span></header><div class="stat-val"><b>—</b><small>km/s</small></div><div class="stat-note">Loading NOAA real-time solar wind…</div><svg class="spark" viewBox="0 0 200 48" preserveAspectRatio="none"></svg><footer>24 h · NOAA SWPC RTSW</footer></article>
+      <article class="stat-card" id="statKp"><header><span class="stat-ico">◎</span><span>Planetary Kp index</span></header><div class="stat-val"><b>—</b><small>/ 9</small></div><div class="stat-note">Loading NOAA Kp…</div><svg class="spark bars" viewBox="0 0 200 48" preserveAspectRatio="none"></svg><footer>7 days of 3-hour Kp · NOAA SWPC</footer></article>
+      <article class="stat-card" id="statProton"><header><span class="stat-ico">✳</span><span>Proton flux ≥10 MeV</span></header><div class="stat-val"><b>—</b><small>pfu</small></div><div class="stat-note">Loading GOES protons…</div><svg class="spark" viewBox="0 0 200 48" preserveAspectRatio="none"></svg><footer>24 h · GOES primary · S1 at 10 pfu</footer></article>
+      <article class="stat-card" id="statXray"><header><span class="stat-ico">☀</span><span>X-ray flare class</span></header><div class="stat-val"><b>—</b><small></small></div><div class="stat-note">Loading GOES X-rays…</div><svg class="spark" viewBox="0 0 200 48" preserveAspectRatio="none"></svg><footer>24 h · GOES 0.1–0.8 nm</footer></article>
+    </div>
+
+    <div class="obs-grid two">
+      <article class="obs-panel" id="xrayPanel">
+        <header class="panel-h"><div><div class="eyebrow">SOLAR X-RAY FLUX · LAST 24 HOURS</div><h3>Flare activity</h3></div><div class="legend"><span class="lg-long">0.1–0.8 nm</span><span class="lg-short">0.05–0.4 nm</span></div></header>
+        <div class="chart-wrap"><svg id="xrayChart" viewBox="0 0 760 300" preserveAspectRatio="none" role="img" aria-label="GOES X-ray flux, last 24 hours"></svg><div class="chart-empty" id="xrayEmpty">Loading GOES X-ray data…</div></div>
+        <footer class="panel-f"><span id="xrayStamp">—</span><a href="https://www.swpc.noaa.gov/products/goes-x-ray-flux" target="_blank" rel="noopener noreferrer">Source: NOAA SWPC · GOES ↗</a></footer>
+      </article>
+      <article class="obs-panel" id="activityPanel">
+        <header class="panel-h"><div><div class="eyebrow">RECENT ACTIVITY · 7 DAYS</div><h3>Flares, alerts &amp; warnings</h3></div></header>
+        <ul class="activity" id="activityList"><li class="muted">Loading NOAA alerts and GOES flare list…</li></ul>
+        <footer class="panel-f"><span id="activityStamp">—</span><a href="https://www.swpc.noaa.gov/products/alerts-watches-and-warnings" target="_blank" rel="noopener noreferrer">Source: NOAA SWPC ↗</a></footer>
+      </article>
+    </div>
+
+    <div class="obs-grid three">
+      <article class="obs-panel" id="auroraPanel">
+        <header class="panel-h"><div><div class="eyebrow">AURORA FORECAST · NORTHERN HEMISPHERE</div><h3>Where the lights are likely</h3></div></header>
+        <div class="aurora-body">
+          <figure class="aurora-img"><img id="auroraImg" src="https://services.swpc.noaa.gov/images/animations/ovation/north/latest.jpg" alt="NOAA OVATION aurora forecast map, northern hemisphere" loading="lazy" referrerpolicy="no-referrer"/></figure>
+          <div class="aurora-facts">
+            <div class="fact"><small>CHANCE OVERHEAD · <span id="auroraPlace">GOBLES, MI</span></small><strong id="auroraHere">—</strong></div>
+            <div class="fact"><small>PEAK ALONG YOUR LONGITUDE</small><strong id="auroraPeak">—</strong></div>
+            <div class="fact"><small>HEMISPHERE MAX</small><strong id="auroraMax">—</strong></div>
+            <p class="tiny" id="auroraNote">OVATION model, about 30–90 minutes ahead.</p>
+          </div>
+        </div>
+        <footer class="panel-f"><span id="auroraStamp">—</span><a href="https://www.swpc.noaa.gov/products/aurora-30-minute-forecast" target="_blank" rel="noopener noreferrer">Source: NOAA SWPC OVATION ↗</a></footer>
+      </article>
+      <article class="obs-panel" id="kpForecastPanel">
+        <header class="panel-h"><div><div class="eyebrow">GEOMAGNETIC OUTLOOK</div><h3>Kp: observed &amp; 3-day forecast</h3></div></header>
+        <div class="chart-wrap short"><svg id="kpChart" viewBox="0 0 520 220" preserveAspectRatio="none" role="img" aria-label="Kp observed and forecast"></svg><div class="chart-empty" id="kpEmpty">Loading NOAA Kp forecast…</div></div>
+        <div class="legend"><span class="lg-obs">Observed</span><span class="lg-est">Estimated</span><span class="lg-pred">Predicted</span></div>
+        <div class="probs" id="scaleProbs"></div>
+        <footer class="panel-f"><span id="kpStamp">—</span><a href="https://www.swpc.noaa.gov/products/3-day-forecast" target="_blank" rel="noopener noreferrer">Source: NOAA SWPC ↗</a></footer>
+      </article>
+      <article class="obs-panel" id="sunViews">
+        <header class="panel-h"><div><div class="eyebrow">THE SUN IN FOUR LIGHTS</div><h3>NASA SDO, latest images</h3></div></header>
+        <div class="sun-grid">
+          <figure><img src="https://sdo.gsfc.nasa.gov/assets/img/latest/latest_512_0171.jpg" alt="SDO AIA 171 Å" loading="lazy"/><figcaption>AIA 171 Å · corona loops</figcaption></figure>
+          <figure><img src="https://sdo.gsfc.nasa.gov/assets/img/latest/latest_512_0193.jpg" alt="SDO AIA 193 Å" loading="lazy"/><figcaption>AIA 193 Å · coronal holes</figcaption></figure>
+          <figure><img src="https://sdo.gsfc.nasa.gov/assets/img/latest/latest_512_0304.jpg" alt="SDO AIA 304 Å" loading="lazy"/><figcaption>AIA 304 Å · chromosphere</figcaption></figure>
+          <figure><img src="https://sdo.gsfc.nasa.gov/assets/img/latest/latest_512_HMIIC.jpg" alt="SDO HMI continuum" loading="lazy"/><figcaption>HMI · sunspots</figcaption></figure>
+        </div>
+        <footer class="panel-f"><span>Capture time is printed at the bottom of each image</span><a href="https://sdo.gsfc.nasa.gov/data/" target="_blank" rel="noopener noreferrer">Source: NASA/SDO ↗</a></footer>
+      </article>
+    </div>
+
+    <details class="more-feeds"><summary>More live feeds from the Hive Astra workbench</summary><div id="signalGrid" class="content-cards"></div></details>
+    <p class="obs-disclaimer">Data: NOAA Space Weather Prediction Center and NASA (SDO, EPIC). Times shown in Eastern Time (ET). Hive Astra is an educational site by Codex Hive Labs. It is not an official forecast and is not affiliated with or endorsed by NOAA or NASA. For warnings, use <a href="https://www.swpc.noaa.gov/" target="_blank" rel="noopener noreferrer">swpc.noaa.gov</a>.</p>
+  </section>
+  <section class="content-panel hidden obs" id="missionsPanel" aria-labelledby="misTitle">
+    <div class="obs-head">
+      <div>
+        <div class="eyebrow gold">FROM THE FRONTIER · MISSIONS</div>
+        <h2 id="misTitle">Mission control, <em>Hive style.</em></h2>
+        <p>Eight NASA missions, from low Earth orbit to the edge of the heliosphere. The facts come from NASA mission pages, checked Nov 19, 2026, and every live item is labeled.</p>
+      </div>
+      <div class="obs-head-side"><div class="obs-updated"><span class="pulse" id="issPulse"></span><span id="issUpdated">Connecting to ISS position feed…</span></div></div>
+    </div>
+
+    <div class="obs-hero mission-hero hex-frame">
+      <svg id="orbitMap" class="orbit-map" viewBox="0 0 1200 520" preserveAspectRatio="xMidYMid meet" role="img" aria-label="Schematic map of where the featured missions operate around Earth, not to scale">
+        <defs>
+          <radialGradient id="sunGlow" cx=".5" cy=".5" r=".5"><stop offset="0" stop-color="#ffe7a8"/><stop offset=".45" stop-color="#f1a500"/><stop offset="1" stop-color="#f1a500" stop-opacity="0"/></radialGradient>
+          <clipPath id="earthClip"><circle cx="600" cy="260" r="92"/></clipPath>
+          <radialGradient id="earthShade" cx=".35" cy=".35" r=".75"><stop offset=".55" stop-color="#000" stop-opacity="0"/><stop offset="1" stop-color="#000" stop-opacity=".55"/></radialGradient>
+        </defs>
+        <circle cx="40" cy="260" r="120" fill="url(#sunGlow)" opacity=".85"/>
+        <text x="22" y="410" class="om-label">TO THE SUN</text>
+        <g class="om-orbits" fill="none">
+          <ellipse cx="600" cy="260" rx="122" ry="40" class="o-leo"/>
+          <ellipse cx="600" cy="260" rx="175" ry="64" class="o-geo"/>
+          <ellipse cx="600" cy="260" rx="400" ry="150" class="o-moon"/>
+          <path d="M600,168 C760,40 1040,90 1040,200 C1040,330 760,420 690,330 C640,280 640,230 600,168" class="o-artemis"/>
+          <line x1="232" y1="260" x2="508" y2="260" class="o-l1"/>
+          <line x1="692" y1="260" x2="1150" y2="260" class="o-l2"/>
+        </g>
+        <image id="omEarth" x="508" y="168" width="184" height="184" clip-path="url(#earthClip)" preserveAspectRatio="xMidYMid slice"/>
+        <circle cx="600" cy="260" r="92" fill="url(#earthShade)"/>
+        <circle cx="600" cy="260" r="92" fill="none" stroke="rgba(160,200,255,.35)" stroke-width="2"/>
+        <g class="om-moon"><circle cx="1000" cy="226" r="16" fill="#bdbab3"/><circle cx="995" cy="221" r="4" fill="#a19d95"/><circle cx="1005" cy="232" r="3" fill="#a19d95"/></g>
+        <g class="om-points">
+          <g data-m="iss" class="om-pt"><circle id="issDot" cx="705" cy="290" r="6"/><text x="716" y="318">ISS · LEO</text></g>
+          <g data-m="sdo" class="om-pt"><circle cx="438" cy="296" r="6"/><text x="352" y="330">SDO · GEO</text></g>
+          <g data-m="imap" class="om-pt"><circle cx="300" cy="260" r="7"/><text x="262" y="244">IMAP · L1</text></g>
+          <g data-m="webb" class="om-pt"><circle cx="1110" cy="260" r="7"/><text x="1150" y="296" text-anchor="end">WEBB · L2</text></g>
+          <g data-m="artemis2" class="om-pt"><circle cx="1040" cy="200" r="6"/><text x="1000" y="168" text-anchor="middle">ARTEMIS II PATH</text></g>
+        </g>
+      </svg>
+      <div class="om-callout iss-callout"><small>ISS RIGHT NOW · LIVE</small><strong id="issPos">—</strong><span id="issAlt">altitude — · speed —</span></div>
+      <div class="om-callout far-callout"><small>FARTHER OUT</small><span>Europa Clipper → Jupiter (2030)<br/>Psyche → asteroid Psyche (2029)<br/>Parker → close solar orbits<br/>Perseverance → Jezero Crater, Mars</span></div>
+      <div class="hero-caption">Schematic, not to scale. Positions are illustrative except the ISS readout, which is live. L1 and L2 are about 1.5 million km from Earth, and the Moon about 384,000 km. Earth image: NASA EPIC.</div>
+    </div>
+
+    <div class="mission-console">
+      <aside class="mission-list-wrap obs-panel">
+        <header class="panel-h"><div><div class="eyebrow">MISSION DIRECTORY</div><h3>Choose a mission</h3></div></header>
+        <div class="m-filters" role="tablist" aria-label="Filter missions">
+          <button class="chip active" data-f="all">All</button><button class="chip" data-f="active">Operating</button><button class="chip" data-f="cruise">En route</button><button class="chip" data-f="done">Completed</button>
+        </div>
+        <ul class="mission-list" id="missionList" role="listbox" aria-label="Missions"></ul>
+      </aside>
+      <article class="mission-detail obs-panel" id="missionDetail" aria-live="polite"></article>
+    </div>
+
+    <div class="featured-head"><div class="eyebrow gold">FEATURED MISSIONS</div><span class="tiny">Images: NASA. Artist's concepts are labeled.</span></div>
+    <div class="featured-row" id="featuredRow"></div>
+    <div id="missionGrid" hidden></div>
+    <p class="obs-disclaimer">Mission facts come from NASA mission pages (linked on each mission), checked Nov 19, 2026. Hive Astra is an educational site by Codex Hive Labs and is not affiliated with or endorsed by NASA.</p>
+  </section>
   <section class="content-panel hidden" id="learnPanel"><div class="content-top"><div class="eyebrow gold">HIVE ACADEMY</div><h2>Look closer. Understand more.</h2><p>Learn the science behind orbits, space weather, and the astronomical observations you explore.</p></div><div class="content-cards" id="lessonGrid"></div></section>
   <section class="content-panel hidden" id="aboutPanel"><div class="content-top"><div class="eyebrow gold">ABOUT THE PROJECT</div><h2>Hive Astra.</h2><p>An exploratory astronomy workbench by Codex Hive Labs—where interactive visualization meets real scientific observations.</p></div><div class="about-split"><img class="about-logo" src="assets/hive-astra-emblem.webp" alt="Hive Astra official emblem"/><div><h3>Built to inspire exploration.</h3><p>The interactive orrery uses simplified orbital elements and deliberately exaggerated visual sizes. This is a learning and discovery experience, not a navigation-grade ephemeris.</p><p>Live observations are labeled by source and distinguished from orbital estimates, predictions, and illustrations. No agency endorsement is implied.</p><button class="gold-button" id="aboutSources">View source references ↗</button></div></div></section>
 
@@ -177,5 +340,6 @@
 <script src="globe.js" defer></script>
 <script src="epic.js" defer></script>
 <script src="app.js" defer></script>
+<script src="observatory.js" defer></script>
 </body>
 </html>
