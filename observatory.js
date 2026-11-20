@@ -18,12 +18,13 @@ const FEEDS={
   alerts:SW+'/products/alerts.json',
   scales:SW+'/products/noaa-scales.json'
 };
-const PLACE={name:'Gobles, MI',lat:42.36,lon:-85.88};
-const TZ='America/New_York';
+// Observer comes from location.js (generic default; visitor can opt in to their own). Times use the browser's own time zone.
+const place=()=>window.HiveAstraObserver?window.HiveAstraObserver.get():{name:'Your sky',lat:40,lon:-100,src:'default'};
+const TZ=undefined;
 // SWPC tags without a zone are UTC
 const T=s=>{if(!s)return null;s=String(s).trim().replace(' ','T');if(!/Z$|[+-]\d\d:?\d\d$/.test(s))s+='Z';const d=new Date(s);return isNaN(d)?null:d};
-const fmtET=(d,o={})=>d?d.toLocaleString('en-US',{timeZone:TZ,month:'short',day:'numeric',hour:'numeric',minute:'2-digit',...o})+' ET':'—';
-const fmtTimeET=d=>d?d.toLocaleTimeString('en-US',{timeZone:TZ,hour:'numeric',minute:'2-digit'})+' ET':'—';
+const fmtET=(d,o={})=>d?d.toLocaleString('en-US',{timeZone:TZ,month:'short',day:'numeric',hour:'numeric',minute:'2-digit',timeZoneName:'short',...o})+'':'—';
+const fmtTimeET=d=>d?d.toLocaleTimeString('en-US',{timeZone:TZ,hour:'numeric',minute:'2-digit',timeZoneName:'short'}):'—';
 const num=(v,dp=0)=>Number.isFinite(v)?v.toLocaleString('en-US',{minimumFractionDigits:dp,maximumFractionDigits:dp}):'—';
 async function getJSON(url,ms=20000){const c=new AbortController();const t=setTimeout(()=>c.abort(),ms);try{const r=await fetch(url,{signal:c.signal,cache:'no-store'});if(!r.ok)throw new Error('HTTP '+r.status);return await r.json()}finally{clearTimeout(t)}}
 const status={};const stamps=[];
@@ -119,10 +120,11 @@ function rActivity(){const items=[];const okA=Array.isArray(F.alerts),okF=Array.
   $('activityStamp').textContent=`${items.length} events · ${okA?'':'alerts feed unavailable · '}${okF?'':'flare list unavailable · '}newest ${items[0]?fmtET(items[0].t):'—'}`;
 }
 function rAurora(){const d=F.aur;if(!d||!Array.isArray(d.coordinates)){['auroraHere','auroraPeak','auroraMax'].forEach(i=>$(i).textContent='—');$('auroraStamp').textContent='OVATION feed unavailable';return}
-  const lon=Math.round((PLACE.lon+360)%360),lat=Math.round(PLACE.lat);let here=null,peak={v:-1,lat:null},mx={v:-1};
-  for(const[x,y,v]of d.coordinates){if(y<=0)continue;if(v>mx.v)mx={v,lon:x,lat:y};if(x===lon){if(y===lat)here=v;if(v>peak.v)peak={v,lat:y}}}
-  $('auroraPlace').textContent=PLACE.name.toUpperCase();$('auroraHere').textContent=here==null?'—':here+'%';
-  $('auroraPeak').textContent=peak.lat==null?'—':`${peak.v}% at ${peak.lat}°N`;$('auroraMax').textContent=mx.v<0?'—':mx.v+'%';
+  const P=place(),south=P.lat<0,lon=Math.round((P.lon+360)%360)%360,lat=Math.round(P.lat);let here=null,peak={v:-1,lat:null},mx={v:-1};
+  for(const[x,y,v]of d.coordinates){if(south?y>=0:y<=0)continue;if(v>mx.v)mx={v,lon:x,lat:y};if(x===lon){if(y===lat)here=v;if(v>peak.v)peak={v,lat:y}}}
+  $('auroraPlace').textContent=window.HiveAstraObserver?window.HiveAstraObserver.short(P):'YOUR SKY';$('auroraHere').textContent=here==null?'—':here+'%';
+  $('auroraPeak').textContent=peak.lat==null?'—':`${peak.v}% at ${Math.abs(peak.lat)}°${south?'S':'N'}`;
+  const img=$('auroraImg');if(img){const hemi=south?'south':'north';if(!img.src.includes('/ovation/'+hemi+'/')){img.src=`https://services.swpc.noaa.gov/images/animations/ovation/${hemi}/latest.jpg`;img.alt=`NOAA OVATION aurora forecast map, ${hemi}ern hemisphere`}}const hm=$('auroraHemi');if(hm)hm.textContent=south?'SOUTHERN':'NORTHERN';$('auroraMax').textContent=mx.v<0?'—':mx.v+'%';
   const ot=T(d['Observation Time']),ft=T(d['Forecast Time']);if(ot)stamps.push(ot);
   $('auroraNote').textContent=`OVATION model. Probability of visible aurora directly overhead, forecast for ${fmtTimeET(ft)}.`;
   $('auroraStamp').textContent=`Model run ${fmtET(ot)}`;
@@ -138,7 +140,7 @@ function rKpForecast(){const d=F.kpf;if(!Array.isArray(d)){$('kpEmpty').textCont
     const day=r.t.toLocaleDateString('en-US',{timeZone:TZ,weekday:'short',day:'numeric'});if(day!==lastDay){lastDay=day;g+=`<line class="grid" x1="${x}" x2="${x}" y1="${mt}" y2="${H-mb}"/><text class="ax" x="${x+3}" y="${H-8}">${day}</text>`}});
   const nx=win.findIndex(r=>+r.t>now);if(nx>0){const x=ml+nx*bw;g+=`<line x1="${x}" x2="${x}" y1="${mt}" y2="${H-mb}" stroke="#ffd36b" stroke-width="1.2"/><text x="${x+4}" y="${mt+10}" font-size="10" fill="#ffd36b">now</text>`}
   svg.setAttribute('viewBox',`0 0 ${W} ${H}`);svg.innerHTML=g;$('kpEmpty').classList.add('gone');
-  const lastObs=[...rows].reverse().find(r=>r.o==='observed');$('kpStamp').textContent=`Last observed ${lastObs?fmtET(lastObs.t):'—'} · times ET`;
+  const lastObs=[...rows].reverse().find(r=>r.o==='observed');$('kpStamp').textContent=`Last observed ${lastObs?fmtET(lastObs.t):'—'} · times in your time zone`;
 }
 function rScales(){const d=F.scales;const chips=document.querySelectorAll('.scale-chip');if(!d||!d['0']){chips.forEach(c=>{c.querySelector('span').textContent='—'});$('scaleProbs').innerHTML='<div class="prob">NOAA scales feed unavailable.</div>';return}
   const cur=d['0'],past=d['-1'];chips.forEach(c=>{const k=c.dataset.scale;const s=cur[k]?.Scale;c.querySelector('span').textContent=s==null?'—':k+s;c.querySelector('small').textContent=(({R:'Radio',S:'Radiation',G:'Geomag'})[k])+(cur[k]?.Text?` · ${cur[k].Text}`:'');c.className='scale-chip'+(s&&s!=='0'?' lvl'+s:'');const ps=past?.[k]?.Scale;c.title=`NOAA ${k}-scale now: ${k}${s??'?'}${ps!=null?` · past 24 h max: ${k}${ps}${past[k].Text?` (${past[k].Text})`:''}`:''}`});
@@ -247,7 +249,9 @@ let rz;window.addEventListener('resize',()=>{clearTimeout(rz);rz=setTimeout(()=>
 document.querySelector('.tab[data-tab="signals"]')?.addEventListener('click',()=>setTimeout(()=>{try{if(F.xr)rXray();if(F.kpf)rKpForecast()}catch(e){}},30));
 // mobile orbit map framing
 const om=$('orbitMap');const mq=matchMedia('(max-width:730px)');const frame=()=>om&&om.setAttribute('viewBox',mq.matches?'190 60 990 400':'0 0 1200 520');mq.addEventListener?.('change',frame);frame();
-// deep links: #signals / #missions open those tabs
+// recompute location-dependent readouts when the visitor changes their sky
+window.addEventListener('astra:observer',()=>{try{rAurora()}catch(e){}});
+// deep links: #signals / #missions / #learn open those tabs (#learn/<lesson> is handled by lessons.js)
 const openHash=()=>{const h=location.hash.replace('#','');const b=document.querySelector(`.tab[data-tab="${h}"]`);if(b)b.click()};window.addEventListener('hashchange',openHash);setTimeout(openHash,0);
-document.querySelectorAll('.tab').forEach(b=>b.addEventListener('click',()=>{const t=b.dataset.tab;if(['signals','missions'].includes(t)&&location.hash!=='#'+t)history.replaceState(null,'','#'+t);else if(!['signals','missions'].includes(t)&&location.hash)history.replaceState(null,'',location.pathname)}));
+document.querySelectorAll('.tab').forEach(b=>b.addEventListener('click',()=>{const t=b.dataset.tab,H=['signals','missions','learn'];if(t==='learn'&&location.hash.startsWith('#learn/'))return;if(H.includes(t)&&location.hash!=='#'+t)history.replaceState(null,'','#'+t);else if(!H.includes(t)&&location.hash)history.replaceState(null,'',location.pathname)}));
 })();
